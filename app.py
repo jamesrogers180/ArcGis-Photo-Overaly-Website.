@@ -47,8 +47,6 @@ def index():
     return render_template('index.html')
 
 
-# ...
-
 def arc_sign_in(login_name, password):
     try:
         gis = GIS('https://msugis.maps.arcgis.com', login_name, password)
