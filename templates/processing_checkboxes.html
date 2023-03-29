@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Select fields to process images</h1>
+  <form method="POST" action="{{ url_for('process_checkboxes') }}">
+    <div class="checkboxes">
+      {% for field in fields %}
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="field_checkbox" value="{{ field }}" id="{{ field }}">
+          <label class="form-check-label" for="{{ field }}">
+            {{ field }}
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+    <br>
+    <input type="submit" class="btn btn-primary" value="Process selected fields">
+  </form>
+{% endblock %}
