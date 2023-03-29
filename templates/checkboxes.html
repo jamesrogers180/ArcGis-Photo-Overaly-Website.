@@ -16,7 +16,14 @@
                 <label for="{{ field }}">{{ field }}</label>
             </div>
         {% endfor %}
-        <input type="submit" value="Submit">
+        <label for="start_object_id">Start Object ID:</label>
+         <input type="number" name="start_object_id" id="start_object_id" min="1" required>
+        <br>
+        <label for="end_object_id">End Object ID:</label>
+        <input type="number" name="end_object_id" id="end_object_id" min="1" required>
+        <br>
+        <input type="submit" value="Process Images">
+</form>
     </form>
 </body>
 </html>

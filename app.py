@@ -61,7 +61,7 @@ def checkboxes():
     fields, fl = get_fields(layer_url, gis)
 
 
-    return render_template('checkboxes.html', fields=fields, layer_name=layer_name)
+    return render_template('checkboxes.html', fields=fields)
 
 
 @app.route('/process_checkboxes', methods=['GET', 'POST'])
@@ -73,9 +73,13 @@ def process_checkboxes():
     if request.method == 'POST':
         if layer_url:
             selected_fields = request.form.getlist('field_checkbox')
+            start_object_id = int(request.form['start_object_id'])
+            end_object_id = int(request.form['end_object_id'])
 
             # Get the survey results and attachments
             survey_results, attachment_list = make_lists(fl)
+            #set a range of object id's to allow for a select few to be processed and not all of them at once
+            attachment_list = [att for att in attachment_list if start_object_id <= att['objectid'] <= end_object_id]
             # counter for how many images are bing processed
             remaining_images = len(attachment_list)
             # Create a folder for the processed images
