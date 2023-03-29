@@ -2,9 +2,12 @@
 <html>
 <head>
     <title>ArcGis Photo Overlay Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>ArcGis Photo Overalay Generator</h1>
+   <header>
+        <h1>ArcGis Photo Overlay Generator</h1>
+    </header>
     <form method="post">
         <label for="login_name">Login Name:</label>
         <input type="text" name="login_name" required>
@@ -18,5 +21,6 @@
         <input type="submit" value="Submit">
 
     </form>
+    <footer><p>&copy; 2023 Trussy Bussy.INC All rights reserved.</p></footer>
 </body>
 </html>
