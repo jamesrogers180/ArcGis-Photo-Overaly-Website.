@@ -24,7 +24,6 @@ fl = None
 remaining_images = 0
 processing_timestamp = None
 
-
 # ...
 
 @app.route('/', methods=['GET', 'POST'])
@@ -59,8 +58,10 @@ def arc_sign_in(login_name, password):
 def checkboxes():
     global gis, layer_url
     layer_url = session.get('layer_url')
-    fields = get_fields(layer_url, gis)
-    return render_template('checkboxes.html', fields=fields)
+    fields, fl = get_fields(layer_url, gis)
+
+
+    return render_template('checkboxes.html', fields=fields, layer_name=layer_name)
 
 
 @app.route('/process_checkboxes', methods=['GET', 'POST'])
@@ -68,6 +69,7 @@ def process_checkboxes():
     global gis, layer_url, remaining_images, processing_timestamp
     layer_url = session.get('layer_url')
     fields, fl = get_fields(layer_url, gis)
+    layer_name = fl.properties['name']
     if request.method == 'POST':
         if layer_url:
             selected_fields = request.form.getlist('field_checkbox')
@@ -90,7 +92,7 @@ def process_checkboxes():
             return redirect(url_for('processing'))
 
         # Add this return statement to render the checkboxes template for a 'GET' request
-    return render_template('checkboxes.html', fields=fields)
+    return render_template('checkboxes.html', fields=fields, layer_name=layer_name)
 
 
 @app.route('/processed_images/<timestamp>', methods=['GET', 'POST'])
