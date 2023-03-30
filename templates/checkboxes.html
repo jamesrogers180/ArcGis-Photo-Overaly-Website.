@@ -7,24 +7,37 @@
     <title>Field Checkboxes</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<h1>Select Feilds you want on the photo</h1>
-<h2>Layer Name: {{ layer_name }}</h2>
+<div class="header-block">
+    <h1>Select Fields you want on the photo</h1>
+    <h2>Layer Name: {{ layer_name }}</h2>
+</div>
 <body>
     <form action="{{ url_for('process_checkboxes') }}" method="POST">
-       {% for field in fields %}
+     <div class="checkbox-section">
+         <div class="checkboxes-wrapper">
+            {% for field in fields %}
+            <div class="checkbox-container">
+                <input type="checkbox" name="field_checkbox" value="{{ field }}" id="{{ field }}">
+                <label for="{{ field }}">{{ field }}</label>
+            </div>
+            {% endfor %}
+         </div>
+     <div>
+        <div class="object-id-section">
+    <h2>Total Object IDs Available: {{ total_features }}</h2>
+            <div class="checkbox-container">
+                <label for="start_object_id">Start Object Id:</label>
+                <input type="number" name="start_object_id" min="0" required>
+            </div>
+
         <div class="checkbox-container">
-        <input type="checkbox" name="field_checkbox" value="{{ field }}" id="{{ field }}">
-        <label for="{{ field }}">{{ field }}</label>
+            <label for="end_object_id">End Object Id:</label>
+            <input type="number" name="end_object_id" min="0" required>
         </div>
-        {% endfor %}
-        <label for="start_object_id">Start Object ID:</label>
-         <input type="number" name="start_object_id" id="start_object_id" min="1" required>
+    </div>
         <br>
-        <label for="end_object_id">End Object ID:</label>
-        <input type="number" name="end_object_id" id="end_object_id" min="1" required>
-        <br>
-        <input type="submit" value="Process Images">
-</form>
+         <input type="submit" value="Process Images">
+
     </form>
 </body>
 </html>

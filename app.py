@@ -12,6 +12,8 @@ from flask_executor import Executor
 import zipfile
 import json
 from threading import Thread
+import shutil
+
 
 app = Flask(__name__)
 executor = Executor(app)
@@ -70,6 +72,7 @@ def process_checkboxes():
     layer_url = session.get('layer_url')
     fields, fl = get_fields(layer_url, gis)
     layer_name = fl.properties['name']
+    total_features = get_total_features(layer_url, gis)
     if request.method == 'POST':
         if layer_url:
             selected_fields = request.form.getlist('field_checkbox')
@@ -78,6 +81,8 @@ def process_checkboxes():
 
             # Get the survey results and attachments
             survey_results, attachment_list = make_lists(fl)
+
+
             #set a range of object id's to allow for a select few to be processed and not all of them at once
             attachment_list = [att for att in attachment_list if start_object_id <= att['objectid'] <= end_object_id]
             # counter for how many images are bing processed
@@ -96,7 +101,7 @@ def process_checkboxes():
             return redirect(url_for('processing'))
 
         # Add this return statement to render the checkboxes template for a 'GET' request
-    return render_template('checkboxes.html', fields=fields, layer_name=layer_name)
+    return render_template('checkboxes.html', fields=fields, layer_name=layer_name, total_features=total_features)
 
 
 @app.route('/processed_images/<timestamp>', methods=['GET', 'POST'])
@@ -115,7 +120,11 @@ def processed_images(timestamp):
                 zipf.write(image_path, rel_path)
 
         # Send the ZIP file as a downloadable attachment
-        return send_file(zip_path, as_attachment=True)
+        response =  send_file(zip_path, as_attachment=True)
+        remove_folder(os.path.join(app.config['UPLOAD_FOLDER'], f"processed_images_{timestamp}"))
+        os.remove(zip_path)
+
+        return response
 
     else:
         # Render the processed_images.html template
@@ -249,6 +258,16 @@ def check_status():
     else:
         return jsonify({'status': 'processing', 'remaining': remaining_images})
 
+def get_total_features(layer_url, gis):
+    fl = FeatureLayer(layer_url, gis)
+    return fl.query(return_count_only=True)
+
+def remove_folder(folder_path):
+    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        try:
+            shutil.rmtree(folder_path)
+        except Exception as e:
+            print(f"Error removing folder '{folder_path}': {e}")
 
 if __name__ == '__main__':
     app.run(debug=True)
