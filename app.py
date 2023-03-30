@@ -36,15 +36,19 @@ def index():
         login_name = request.form['login_name']
         password = request.form['password']
         layer_url = request.form['layer_url']
-
-        sign_in_result, error = arc_sign_in(login_name, password)
-        if error:
-            flash(error, category='error')
+        if not layer_url.endswith('/0'):
+            layer_url += '/0'
+        try:
+            sign_in_result, error = arc_sign_in(login_name, password)
+            if error:
+                flash(error, category='error')
+                return render_template('index.html')
+            gis = sign_in_result
+            session['layer_url'] = layer_url
+            return redirect(url_for('process_checkboxes'))
+        except Exception as e:
+            flash(f"An unexpected error occurred: {e}", category='error')
             return render_template('index.html')
-        gis = sign_in_result
-        session['layer_url'] = layer_url
-        return redirect(url_for('process_checkboxes'))
-
     return render_template('index.html')
 
 
@@ -76,8 +80,17 @@ def process_checkboxes():
     if request.method == 'POST':
         if layer_url:
             selected_fields = request.form.getlist('field_checkbox')
-            start_object_id = int(request.form['start_object_id'])
-            end_object_id = int(request.form['end_object_id'])
+            if 'process_all' in request.form:  # Check if the "Process All" button was clicked
+                start_object_id = 1
+                end_object_id = total_features
+            else:
+                try:
+                    start_object_id = int(request.form['start_object_id'])
+                    end_object_id = int(request.form['end_object_id'])
+                except ValueError:
+                    flash("Error: Start and End Object IDs must be valid integers.", category='error')
+                    return render_template('checkboxes.html', fields=fields, layer_name=layer_name, total_features=total_features)
+
 
             # Get the survey results and attachments
             survey_results, attachment_list = make_lists(fl)
@@ -187,11 +200,11 @@ def add_text_to_images(image_paths, survey_results, selected_fields, attachments
                     exif_data = img.getexif()
                     orientation = exif_data.get(274, 1) if exif_data else 1
                     if orientation == 3:
-                        img = img.rotate(180)
+                        img = img.rotate(180, expand=True)
                     elif orientation == 6:
-                        img = img.rotate(270)
+                        img = img.rotate(270, expand=True)
                     elif orientation == 8:
-                        img = img.rotate(90)
+                        img = img.rotate(90, expand=True)
                     draw = ImageDraw.Draw(img)
                     font = ImageFont.truetype('Times New Roman.ttf', size=30)
                     attribute_values = ", ".join(

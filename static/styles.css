@@ -107,24 +107,7 @@ header h1 {
   margin-bottom: 20px;
   text-align: center;
 }
-.download-button-container {
-  display: flex;
-  text-align: center;
-  margin: 10px 0; /* Add some margin for spacing */
-}
-.download-button {
-  border: 1px solid rgba(0, 0, 0, 0.2); /* Semi-transparent black border */
-  background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
-  padding: 10px 20px;
-  font-size: 1rem;
-  cursor: pointer;
-  text-decoration: none;
-  color: #333;
-  transition: background-color 0.3s;
-}
-.download-button:hover {
-  background-color: rgba(255, 255, 255, 0.9); /* Slightly less transparent white background on hover */
-}
+
 
 footer {
   background-color: rgba(0, 0, 0, 0.5);
@@ -139,4 +122,60 @@ footer {
 
 main {
   padding: 40px 0;
+}
+.button-container {
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.2); /* Semi-transparent black border */
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.3s;
+
+}
+.custom-button {
+    background-color: #006400; /* A darker green color */
+    color: #ffffff; /* White text color */
+    border: none;
+    padding: 6px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition-duration: 0.4s;
+}
+
+body .download-button-container * {
+    background-color: transparent; /* Make sure all children of the container have a transparent background */
+    border: none; /* Remove any border from the children of the container */
+}
+
+.download-button-container form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    padding: 10px;
+    width: 30%;
+    margin: 0 auto;
+}
+
+.download-button {
+    border: none; /* Remove border */
+    background-color: #006400; /* Dark green background color */
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    color: #ffffff; /* White text color */
+    transition: background-color 0.3s;
+    text-align: center;
+}
+
+.download-button:hover {
+    background-color: #004c00; /* Even darker green background on hover */
 }
