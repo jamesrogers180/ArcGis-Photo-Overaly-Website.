@@ -7,19 +7,18 @@ import PIL.ImageFont as ImageFont
 from PIL import Image, ImageDraw
 from arcgis.features import FeatureLayer
 from arcgis.gis import GIS
-from flask import Flask, request, render_template, redirect, url_for, send_file, session, flash, g, jsonify
+from flask import Flask, request, render_template, redirect, url_for, send_file, session, flash, jsonify
 from flask_executor import Executor
 import zipfile
-import json
 from threading import Thread
 import shutil
 
 
-app = Flask(__name__)
-executor = Executor(app)
-app.config['UPLOAD_FOLDER'] = os.path.abspath('uploads')
-app.config['PROCESSED_IMAGES_FOLDER'] = os.environ.get('PROCESSED_IMAGES_FOLDER')
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'secret_key_for_development')
+application = Flask(__name__)
+executor = Executor(application)
+application.config['UPLOAD_FOLDER'] = os.path.abspath('uploads')
+application.config['PROCESSED_IMAGES_FOLDER'] = os.environ.get('PROCESSED_IMAGES_FOLDER')
+application.secret_key = os.environ.get('FLASK_SECRET_KEY', 'secret_key_for_development')
 
 gis = None
 fl = None
@@ -28,7 +27,7 @@ processing_timestamp = None
 
 # ...
 
-@app.route('/', methods=['GET', 'POST'])
+@application.route('/', methods=['GET', 'POST'])
 def index():
     global gis
     if request.method == 'POST':
@@ -60,7 +59,7 @@ def arc_sign_in(login_name, password):
         return None, f"Error: Unable to sign in. Please check your login credentials. ({e})"
 
 
-@app.route('/checkboxes', methods=['GET', 'POST'])
+@application.route('/checkboxes', methods=['GET', 'POST'])
 def checkboxes():
     global gis, layer_url
     layer_url = session.get('layer_url')
@@ -70,7 +69,7 @@ def checkboxes():
     return render_template('checkboxes.html', fields=fields)
 
 
-@app.route('/process_checkboxes', methods=['GET', 'POST'])
+@application.route('/process_checkboxes', methods=['GET', 'POST'])
 def process_checkboxes():
     global gis, layer_url, remaining_images, processing_timestamp
     layer_url = session.get('layer_url')
@@ -103,7 +102,7 @@ def process_checkboxes():
             # Create a folder for the processed images
             timestamp = int(time.time())
             processing_timestamp = timestamp  # Store the timestamp in the global variable
-            folder = os.path.join(app.config['UPLOAD_FOLDER'], f"processed_images_{timestamp}")
+            folder = os.path.join(application.config['UPLOAD_FOLDER'], f"processed_images_{timestamp}")
             os.makedirs(folder)
 
             # Start image processing in a separate thread
@@ -117,24 +116,24 @@ def process_checkboxes():
     return render_template('checkboxes.html', fields=fields, layer_name=layer_name, total_features=total_features)
 
 
-@app.route('/processed_images/<timestamp>', methods=['GET', 'POST'])
+@application.route('/processed_images/<timestamp>', methods=['GET', 'POST'])
 def processed_images(timestamp):
     if request.method == 'POST':
         # Create a ZIP file containing the processed images
         zip_filename = f'processed_images_{timestamp}.zip'
-        zip_path = os.path.join(app.config['UPLOAD_FOLDER'], zip_filename)
+        zip_path = os.path.join(application.config['UPLOAD_FOLDER'], zip_filename)
 
         processed_images = get_processed_images(timestamp)
         with zipfile.ZipFile(zip_path, 'w') as zipf:
             for image_path in processed_images:
                 # Calculate the relative path to preserve the folder structure
                 rel_path = os.path.relpath(image_path,
-                                           os.path.join(app.config['UPLOAD_FOLDER'], f"processed_images_{timestamp}"))
+                                           os.path.join(application.config['UPLOAD_FOLDER'], f"processed_images_{timestamp}"))
                 zipf.write(image_path, rel_path)
 
         # Send the ZIP file as a downloadable attachment
         response =  send_file(zip_path, as_attachment=True)
-        remove_folder(os.path.join(app.config['UPLOAD_FOLDER'], f"processed_images_{timestamp}"))
+        remove_folder(os.path.join(application.config['UPLOAD_FOLDER'], f"processed_images_{timestamp}"))
         os.remove(zip_path)
 
         return response
@@ -242,7 +241,7 @@ def make_lists(fl):
 
 
 def get_processed_images(timestamp):
-    folder = os.path.join(app.config['UPLOAD_FOLDER'], f"processed_images_{timestamp}")
+    folder = os.path.join(application.config['UPLOAD_FOLDER'], f"processed_images_{timestamp}")
     if not os.path.exists(folder):
         return []
 
@@ -257,12 +256,12 @@ def get_processed_images(timestamp):
     return processed_images
 
 
-@app.route('/processing', methods=['GET'])
+@application.route('/processing', methods=['GET'])
 def processing():
     return render_template('processing.html')
 
 
-@app.route('/check_status')
+@application.route('/check_status')
 def check_status():
     global remaining_images, processing_timestamp
     print(remaining_images)
@@ -283,4 +282,4 @@ def remove_folder(folder_path):
             print(f"Error removing folder '{folder_path}': {e}")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    application.run(debug=True)

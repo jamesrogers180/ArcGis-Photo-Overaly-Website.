@@ -1,0 +1,4 @@
+Flask==2.1.1
+arcgis==1.9.0
+Pillow==9.0.1
+flask-executor==1.0.0
